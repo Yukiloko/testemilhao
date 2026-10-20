@@ -49,33 +49,42 @@ box.addEventListener('keydown', async (e) => {
   );
 }
 
-/** Serves a minimal, accessible imitation of the Instagram pages the agent touches. */
+export type MockResponse = { status: number; html?: string };
+
+/** Pure renderer shared by the in-browser route mock (unit tests) and the HTTP server (E2E). */
+export function renderMock(pathname: string, state: MockInstagram, postBody?: string): MockResponse {
+  if (pathname === "/__mock/sent") {
+    state.sent.push(JSON.parse(postBody ?? "{}") as { handle: string; text: string });
+    return { status: 204 };
+  }
+  if (state.mode === "logged_out" || pathname.startsWith("/accounts/login")) {
+    return { status: 200, html: page("Login", "<form><input name='username'><input name='password' type='password'><button>Entrar</button></form>") };
+  }
+  if (state.mode === "restricted") {
+    return { status: 200, html: page("Instagram", "<div role='dialog'><h2>Tente novamente mais tarde</h2><p>Restringimos determinadas atividades para proteger nossa comunidade.</p></div>") };
+  }
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] === "explore" && parts[1] === "tags" && parts[2]) {
+    const posts = state.hashtags.get(parts[2]) ?? [];
+    return { status: 200, html: page(`#${parts[2]}`, `<main>${posts.map((author, i) => `<a href="/p/${parts[2]}${i}-${author}/">post</a>`).join("")}</main>`) };
+  }
+  if (parts[0] === "p" && parts[1]) {
+    const author = parts[1].split("-").slice(1).join("-");
+    return { status: 200, html: page("Post", `<main><article><header><a href="/${author}/">${author}</a></header></article></main>`) };
+  }
+  if (parts[0] === "direct" && parts[1] === "t" && parts[2]) return { status: 200, html: directHtml(parts[2], state.mode !== "no_confirmation") };
+  const profile = parts[0] ? state.profiles.get(parts[0]) : undefined;
+  if (profile) return { status: 200, html: profileHtml(profile) };
+  return { status: 200, html: page("Instagram", "<main><h2>Esta página não está disponível.</h2></main>") };
+}
+
+/** Serves the mock on Instagram's real origin inside the browser, via request interception. */
 export async function installMockInstagram(context: BrowserContext, state: MockInstagram): Promise<void> {
   await context.route(`${BASE}/**`, async (route: Route) => {
     const url = new URL(route.request().url());
-    const html = (body: string) => route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body });
-    if (url.pathname === "/__mock/sent") {
-      state.sent.push(JSON.parse(route.request().postData() ?? "{}") as { handle: string; text: string });
-      return route.fulfill({ status: 204 });
-    }
-    if (state.mode === "logged_out" || url.pathname.startsWith("/accounts/login")) {
-      return html(page("Login", "<form><input name='username'><input name='password' type='password'><button>Entrar</button></form>"));
-    }
-    if (state.mode === "restricted") return html(page("Instagram", "<div role='dialog'><h2>Tente novamente mais tarde</h2><p>Restringimos determinadas atividades para proteger nossa comunidade.</p></div>"));
-
-    const parts = url.pathname.split("/").filter(Boolean);
-    if (parts[0] === "explore" && parts[1] === "tags" && parts[2]) {
-      const posts = state.hashtags.get(parts[2]) ?? [];
-      return html(page(`#${parts[2]}`, `<main>${posts.map((author, i) => `<a href="/p/${parts[2]}${i}-${author}/">post</a>`).join("")}</main>`));
-    }
-    if (parts[0] === "p" && parts[1]) {
-      const author = parts[1].split("-").slice(1).join("-");
-      return html(page("Post", `<main><article><header><a href="/${author}/">${author}</a></header></article></main>`));
-    }
-    if (parts[0] === "direct" && parts[1] === "t" && parts[2]) return html(directHtml(parts[2], state.mode !== "no_confirmation"));
-    const profile = parts[0] ? state.profiles.get(parts[0]) : undefined;
-    if (profile) return html(profileHtml(profile));
-    return html(page("Instagram", "<main><h2>Esta página não está disponível.</h2></main>"));
+    const res = renderMock(url.pathname, state, route.request().postData() ?? undefined);
+    if (!res.html) return route.fulfill({ status: res.status });
+    return route.fulfill({ status: res.status, contentType: "text/html; charset=utf-8", body: res.html });
   });
 }
 

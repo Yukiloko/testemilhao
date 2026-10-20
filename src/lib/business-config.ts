@@ -27,7 +27,7 @@ export const businessConfigSchema = z.object({
 
 export type BusinessConfig = z.infer<typeof businessConfigSchema>;
 
-const CONFIG_PATH = path.resolve(process.cwd(), "config/business.json");
+const CONFIG_PATH = path.resolve(process.cwd(), process.env.BUSINESS_CONFIG_PATH ?? "config/business.json");
 
 let cached: BusinessConfig | undefined;
 let override: BusinessConfig | undefined;

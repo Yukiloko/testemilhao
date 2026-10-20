@@ -8,23 +8,22 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "dev": "concurrently -k -n web,worker -c cyan,magenta \"next dev\" \"tsx watch src/worker/main.ts\"",
+    "dev": "concurrently -k -n web,worker -c cyan,magenta \"next dev\" \"tsx watch --conditions=react-server src/worker/main.ts\"",
     "build": "next build",
-    "start": "concurrently -k -n web,worker -c cyan,magenta \"next start\" \"tsx src/worker/main.ts\"",
-    "worker": "tsx src/worker/main.ts",
+    "start": "concurrently -k -n web,worker -c cyan,magenta \"next start\" \"tsx --conditions=react-server src/worker/main.ts\"",
+    "worker": "tsx --conditions=react-server src/worker/main.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/scripts/migrate.ts",
-    "db:seed": "tsx src/db/scripts/seed.ts",
-    "db:backup": "tsx src/db/scripts/backup.ts",
-    "db:restore": "tsx src/db/scripts/restore.ts",
-    "browser:dry-run": "tsx src/integrations/browser/scripts/dry-run.ts",
-    "browser:smoke": "tsx src/integrations/browser/scripts/smoke.ts",
-    "e2e": "tsx scripts/e2e.ts"
+    "db:migrate": "tsx --conditions=react-server src/db/scripts/migrate.ts",
+    "db:backup": "tsx --conditions=react-server src/db/scripts/backup.ts",
+    "db:restore": "tsx --conditions=react-server src/db/scripts/restore.ts",
+    "browser:dry-run": "tsx --conditions=react-server src/integrations/browser/scripts/dry-run.ts",
+    "browser:smoke": "tsx --conditions=react-server src/integrations/browser/scripts/smoke.ts",
+    "e2e": "tsx --conditions=react-server scripts/e2e.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",
@@ -50,7 +49,6 @@
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.72.0",
     "vitest": "4.1.8"
   }
 }

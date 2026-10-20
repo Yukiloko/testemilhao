@@ -1,8 +1,7 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import tseslint from "typescript-eslint";
 
-export default [
+const config = [
   ...nextVitals,
   ...nextTs,
   {
@@ -12,6 +11,7 @@ export default [
       "no-empty": ["error", { allowEmptyCatch: false }],
     },
   },
-  ...tseslint.configs.disableTypeChecked.map((c) => ({ ...c, files: ["**/*.mjs"] })),
-  { ignores: [".next/**", "node_modules/**", "drizzle/**", "data/**", "backups/**", "next-env.d.ts"] },
+  { ignores: [".next/**", "node_modules/**", "drizzle/**", "data/**", "backups/**", "artifacts/**", "next-env.d.ts"] },
 ];
+
+export default config;

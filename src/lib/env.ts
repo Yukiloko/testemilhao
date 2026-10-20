@@ -31,8 +31,8 @@ const envSchema = z
       .refine((v) => Buffer.from(v, "base64").length === 32, "must be 32 bytes encoded as base64"),
 
     MAX_DMS_PER_DAY: z.coerce.number().int().positive().max(200),
-    MIN_SECONDS_BETWEEN_DMS: z.coerce.number().int().min(30),
-    MAX_SECONDS_BETWEEN_DMS: z.coerce.number().int().min(30),
+    MIN_SECONDS_BETWEEN_DMS: z.coerce.number().int().min(60),
+    MAX_SECONDS_BETWEEN_DMS: z.coerce.number().int().min(60),
     OPERATING_HOURS: z
       .string()
       .refine((v) => {

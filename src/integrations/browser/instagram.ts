@@ -145,7 +145,12 @@ export async function sendDirectMessage(page: Page, baseUrl: string, handle: str
     if (error instanceof SessionLostError || error instanceof InstagramRestrictionError || error instanceof ProfileNotFoundError) throw error;
     throw new BrowserActionError(`before send: ${error instanceof Error ? error.message : String(error)}`, "no");
   }
-  if (dryRun) return { status: "dry_run" };
+  if (dryRun) {
+    // Leave no draft behind in the operator's inbox.
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.press("Backspace");
+    return { status: "dry_run" };
+  }
 
   await page.keyboard.press("Enter");
   try {
