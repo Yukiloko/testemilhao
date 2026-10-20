@@ -25,6 +25,7 @@ const work = fs.mkdtempSync(path.join(os.tmpdir(), "bm-e2e-"));
 const evidence = path.resolve(process.env.E2E_OUTPUT_DIR ?? path.join(root, "artifacts/e2e"));
 fs.mkdirSync(evidence, { recursive: true });
 const children: ChildProcess[] = [];
+const cleanups: (() => Promise<void>)[] = [];
 const servers: http.Server[] = [];
 const log = (msg: string) => console.log(`[e2e] ${msg}`);
 
@@ -101,6 +102,7 @@ async function main() {
   });
 
   const chrome = await startChrome();
+  cleanups.push(chrome.stop);
   log(`chromium CDP at ${chrome.cdpUrl}`);
 
   const configPath = path.join(work, "business.json");
@@ -238,8 +240,9 @@ main()
     console.error("[e2e] FAILED:", error);
     process.exitCode = 1;
   })
-  .finally(() => {
+  .finally(async () => {
     for (const c of children) c.kill("SIGKILL");
+    for (const cleanup of cleanups) await cleanup().catch(() => undefined);
     for (const s of servers) s.close();
     fs.rmSync(work, { recursive: true, force: true });
     setTimeout(() => process.exit(), 500);
