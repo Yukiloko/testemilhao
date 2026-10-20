@@ -1,0 +1,56 @@
+{
+  "name": "buscando-milhao",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,worker -c cyan,magenta \"next dev\" \"tsx watch src/worker/main.ts\"",
+    "build": "next build",
+    "start": "concurrently -k -n web,worker -c cyan,magenta \"next start\" \"tsx src/worker/main.ts\"",
+    "worker": "tsx src/worker/main.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/scripts/migrate.ts",
+    "db:seed": "tsx src/db/scripts/seed.ts",
+    "db:backup": "tsx src/db/scripts/backup.ts",
+    "db:restore": "tsx src/db/scripts/restore.ts",
+    "browser:dry-run": "tsx src/integrations/browser/scripts/dry-run.ts",
+    "browser:smoke": "tsx src/integrations/browser/scripts/smoke.ts",
+    "e2e": "tsx scripts/e2e.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "13.0.3",
+    "drizzle-orm": "0.45.4",
+    "next": "16.4.2",
+    "openai": "7.39.0",
+    "playwright-core": "1.64.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "concurrently": "10.0.6",
+    "drizzle-kit": "0.31.11",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "4.1.8"
+  }
+}

@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# secrets and business data — never commit
+.env
+.env.*
+!.env.example
+config/business.json
+
+# local runtime state
+.chrome-profile/
+*.db
+*.db-wal
+*.db-shm
+data/
+backups/
+screenshots/
+traces/
+artifacts/
+
+# misc
+.DS_Store
+coverage/
